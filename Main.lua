@@ -1,5 +1,5 @@
 --// Zenith Hub - Main.lua
---// GitHub Loader Version
+--// Versão atualizada e mais estável
 
 repeat task.wait() until game:IsLoaded()
 
@@ -14,7 +14,7 @@ local VirtualUser = game:GetService("VirtualUser")
 local LocalPlayer = Players.LocalPlayer
 
 --====================================================
--- GLOBAL SETTINGS
+-- GLOBAL DEFAULTS
 --====================================================
 
 getgenv().AutoFarm = false
@@ -24,101 +24,101 @@ getgenv().SelectWeapon = "Melee"
 
 getgenv().NoClip = false
 getgenv().FullBright = false
-
 getgenv().WalkSpeed = 16
 getgenv().JumpPower = 50
+
+getgenv().AutoSkillZ = false
+getgenv().AutoSkillX = false
+getgenv().AutoSkillC = false
+getgenv().AutoSkillV = false
+getgenv().AutoSkillF = false
 
 --====================================================
 -- BASE URL
 --====================================================
 
-local BASE =
-"https://raw.githubusercontent.com/Pixelpv/Zenith-Hub/main/"
+local BASE_URL = "https://raw.githubusercontent.com/Pixelpv/Zenith-Hub/main/"
 
 --====================================================
 -- MODULE LOADER
 --====================================================
 
-local function LoadModule(Path)
-
-    local Success, Result = pcall(function()
-
-        return loadstring(game:HttpGet(
-            BASE .. Path
-        ))()
-
+local function LoadFile(path)
+    local ok, result = pcall(function()
+        return loadstring(game:HttpGet(BASE_URL .. path))()
     end)
 
-    if Success then
-        return Result
-    else
-        warn("Failed to load:", Path)
-        warn(Result)
+    if not ok then
+        warn("[Zenith Hub] Failed to load:", path)
+        warn(result)
+        return nil
     end
 
+    return result
+end
+
+local function MustLoad(path)
+    local module = LoadFile(path)
+    if module == nil then
+        error("[Zenith Hub] Critical module failed: " .. path)
+    end
+    return module
 end
 
 --====================================================
 -- LOAD MODULES
 --====================================================
 
-local Tween = LoadModule("Modules/Tween.lua")
-local Combat = LoadModule("Modules/Combat.lua")
-local Quest = LoadModule("Modules/Quest.lua")
-local Bring = LoadModule("Modules/Bring.lua")
-local Farm = LoadModule("Modules/Farm.lua")
+print("[Zenith Hub] Loading modules...")
 
-local GameModule = LoadModule(
-    "Games/BloxFruits.lua"
-)
+local Tween = MustLoad("Modules/Tween.lua")
+local Combat = MustLoad("Modules/Combat.lua")
+local Quest = MustLoad("Modules/Quest.lua")
+local Bring = MustLoad("Modules/Bring.lua")
+local Farm = MustLoad("Modules/Farm.lua")
+
+print("[Zenith Hub] Modules loaded.")
+
+--====================================================
+-- LOAD GAME FILE
+--====================================================
+
+local GameModule = LoadFile("Games/BloxFruits.lua")
+if GameModule then
+    print("[Zenith Hub] Game module loaded:", GameModule.GameName or "Unknown")
+end
 
 --====================================================
 -- LOAD UI
 --====================================================
 
-LoadModule("UI/UI.lua")
-
---====================================================
--- CHECK MODULES
---====================================================
-
-if not Tween
-or not Combat
-or not Quest
-or not Bring
-or not Farm then
-
-    return warn("Failed to load modules.")
-
+local UI = LoadFile("UI/UI.lua")
+if not UI then
+    warn("[Zenith Hub] UI failed to load.")
 end
 
 --====================================================
--- START FARM
+-- START FARM LOOP
 --====================================================
 
-Farm:Start(
-    Tween,
-    Combat,
-    Quest,
-    Bring
-)
+if Farm and Tween and Combat and Quest and Bring then
+    Farm:Start(Tween, Combat, Quest, Bring)
+end
 
 --====================================================
 -- NOCLIP LOOP
 --====================================================
 
 task.spawn(function()
-
-    while task.wait() do
-
-        if getgenv().NoClip then
-            Tween:NoClip(true)
-        else
-            Tween:NoClip(false)
-        end
-
+    while task.wait(0.1) do
+        pcall(function()
+            if getgenv().NoClip and Tween then
+                Tween:NoClip(true)
+            elseif Tween then
+                Tween:NoClip(false)
+            end
+        end)
     end
-
 end)
 
 --====================================================
@@ -126,22 +126,17 @@ end)
 --====================================================
 
 task.spawn(function()
-
     while task.wait(1) do
-
-        if getgenv().FullBright then
-
-            Lighting.Brightness = 2
-            Lighting.ClockTime = 12
-            Lighting.FogEnd = 999999
-            Lighting.GlobalShadows = false
-            Lighting.OutdoorAmbient =
-                Color3.fromRGB(255,255,255)
-
-        end
-
+        pcall(function()
+            if getgenv().FullBright then
+                Lighting.Brightness = 2
+                Lighting.ClockTime = 12
+                Lighting.FogEnd = 999999
+                Lighting.GlobalShadows = false
+                Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+            end
+        end)
     end
-
 end)
 
 --====================================================
@@ -149,34 +144,18 @@ end)
 --====================================================
 
 task.spawn(function()
-
     while task.wait() do
-
         pcall(function()
-
-            local Character =
-                LocalPlayer.Character
-
+            local Character = LocalPlayer.Character
             if Character then
-
-                local Humanoid =
-                    Character:FindFirstChild("Humanoid")
-
+                local Humanoid = Character:FindFirstChildOfClass("Humanoid")
                 if Humanoid then
-
-                    Humanoid.WalkSpeed =
-                        getgenv().WalkSpeed or 16
-
-                    Humanoid.JumpPower =
-                        getgenv().JumpPower or 50
-
+                    Humanoid.WalkSpeed = getgenv().WalkSpeed or 16
+                    Humanoid.JumpPower = getgenv().JumpPower or 50
                 end
             end
-
         end)
-
     end
-
 end)
 
 --====================================================
@@ -184,31 +163,29 @@ end)
 --====================================================
 
 task.spawn(function()
+    while task.wait(0.35) do
+        pcall(function()
+            if not Combat then
+                return
+            end
 
-    while task.wait(0.5) do
-
-        if getgenv().AutoSkillZ then
-            Combat:UseSkill(Enum.KeyCode.Z)
-        end
-
-        if getgenv().AutoSkillX then
-            Combat:UseSkill(Enum.KeyCode.X)
-        end
-
-        if getgenv().AutoSkillC then
-            Combat:UseSkill(Enum.KeyCode.C)
-        end
-
-        if getgenv().AutoSkillV then
-            Combat:UseSkill(Enum.KeyCode.V)
-        end
-
-        if getgenv().AutoSkillF then
-            Combat:UseSkill(Enum.KeyCode.F)
-        end
-
+            if getgenv().AutoSkillZ then
+                Combat:UseSkill(Enum.KeyCode.Z)
+            end
+            if getgenv().AutoSkillX then
+                Combat:UseSkill(Enum.KeyCode.X)
+            end
+            if getgenv().AutoSkillC then
+                Combat:UseSkill(Enum.KeyCode.C)
+            end
+            if getgenv().AutoSkillV then
+                Combat:UseSkill(Enum.KeyCode.V)
+            end
+            if getgenv().AutoSkillF then
+                Combat:UseSkill(Enum.KeyCode.F)
+            end
+        end)
     end
-
 end)
 
 --====================================================
@@ -216,23 +193,19 @@ end)
 --====================================================
 
 LocalPlayer.Idled:Connect(function()
-
-    VirtualUser:CaptureController()
-    VirtualUser:ClickButton2(Vector2.new())
-
+    pcall(function()
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new())
+    end)
 end)
 
 --====================================================
--- GAME INFO
+-- STARTUP LOG
 --====================================================
 
 print("====================================")
 print("Zenith Hub Loaded")
-print("Game:", GameModule.GameName)
-print("Sea:", GameModule:GetSea())
-print("Level:", GameModule:GetLevel())
-print("====================================")
-print("Modules Loaded:")
+print("Modules:")
 print("- Tween")
 print("- Combat")
 print("- Quest")
