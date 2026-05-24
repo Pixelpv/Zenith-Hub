@@ -1,7 +1,6 @@
 --// Zenith Hub - Loader
 
 if getgenv().ZenithHubLoaded then
-    warn("Zenith Hub already loaded.")
     return
 end
 
@@ -14,9 +13,9 @@ repeat task.wait() until game:IsLoaded()
 --====================================================
 
 local Supported = {
-    [2753915549] = true, -- Sea 1
-    [4442272183] = true, -- Sea 2
-    [7449423635] = true  -- Sea 3
+    [2753915549] = true,
+    [4442272183] = true,
+    [7449423635] = true
 }
 
 if not Supported[game.PlaceId] then
@@ -27,11 +26,12 @@ end
 -- LOAD MAIN
 --====================================================
 
+local URL =
+"https://raw.githubusercontent.com/Pixelpv/Zenith-Hub/refs/heads/main/Main.lua"
+
 local Success, Error = pcall(function()
 
-    loadstring(game:HttpGet(
-        "https://raw.githubusercontent.com/Pixelpv/Zenith-Hub/main/Main.lua"
-    ))()
+    loadstring(game:HttpGet(URL))()
 
 end)
 
