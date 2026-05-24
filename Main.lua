@@ -34,7 +34,7 @@ getgenv().JumpPower = 50
 --====================================================
 
 local BASE =
-"https://raw.githubusercontent.com/Pixelpv/Zenith-Hub/refs/heads/main/"
+"https://raw.githubusercontent.com/Pixelpv/Zenith-Hub/main/"
 
 --====================================================
 -- LOAD MODULE
@@ -74,7 +74,7 @@ local function LoadModule(Path)
 end
 
 --====================================================
--- MODULES
+-- LOAD MODULES
 --====================================================
 
 local Tween = LoadModule("Modules/Tween.lua")
@@ -86,33 +86,33 @@ local Farm = LoadModule("Modules/Farm.lua")
 local GameModule = LoadModule("Games/BloxFruits.lua")
 
 --====================================================
--- UI
+-- LOAD UI
 --====================================================
 
 LoadModule("UI/UI.lua")
 
 --====================================================
--- CHECK
+-- CHECK MODULES
 --====================================================
 
 if not Tween then
-    return warn("Tween failed")
+    return warn("Tween module failed.")
 end
 
 if not Combat then
-    return warn("Combat failed")
+    return warn("Combat module failed.")
 end
 
 if not Quest then
-    return warn("Quest failed")
+    return warn("Quest module failed.")
 end
 
 if not Bring then
-    return warn("Bring failed")
+    return warn("Bring module failed.")
 end
 
 if not Farm then
-    return warn("Farm failed")
+    return warn("Farm module failed.")
 end
 
 print("All Modules Loaded")
@@ -151,7 +151,7 @@ task.spawn(function()
 end)
 
 --====================================================
--- FULLBRIGHT
+-- FULLBRIGHT LOOP
 --====================================================
 
 task.spawn(function()
