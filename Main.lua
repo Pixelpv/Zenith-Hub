@@ -34,7 +34,7 @@ getgenv().JumpPower = 50
 --====================================================
 
 local BASE =
-"https://raw.githubusercontent.com/Pixelpv/Zenith-Hub/main/"
+"https://raw.githubusercontent.com/Pixelpv/Zenith-Hub/refs/heads/main/"
 
 --====================================================
 -- LOAD MODULE
